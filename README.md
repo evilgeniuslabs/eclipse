@@ -1,8 +1,8 @@
 # Eclipse
 
-[Demo Video](https://youtu.be/OM4Ad-Sr1Ro?list=PLUYGVM-2vDxLnqGd-mG_AMGEECwHlfd5e):
+[Demo Videos](https://youtu.be/OM4Ad-Sr1Ro?list=PLUYGVM-2vDxLnqGd-mG_AMGEECwHlfd5e):
 
-[![Demo Video](https://youtu.be/OM4Ad-Sr1Ro?list=PLUYGVM-2vDxLnqGd-mG_AMGEECwHlfd5e)
+[![Demo Videos](http://img.youtube.com/vi/dCE2dl4IW_E/0.jpg)](https://youtu.be/OM4Ad-Sr1Ro?list=PLUYGVM-2vDxLnqGd-mG_AMGEECwHlfd5e)
 
 Available from Evil Genius Labs: http://www.evilgeniuslabs.org
 
