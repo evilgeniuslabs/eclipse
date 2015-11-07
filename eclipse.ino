@@ -20,6 +20,8 @@ extern char* itoa(int a, char* buffer, unsigned char radix);
 
 CRGB leds[NUM_LEDS];
 
+#include "MeteorShower.h"
+
 typedef uint8_t (*SimplePattern)();
 typedef SimplePattern SimplePatternList[];
 typedef struct { SimplePattern drawFrame;  String name; } PatternAndName;
@@ -41,6 +43,8 @@ const PatternAndNameList patterns = {
   { sinelon,                "Sinelon" },
   { bpm,                    "Beat" },
   { juggle,                 "Juggle" },
+  { meteorShower,           "Meteor Shower" },
+  { juggle2,                "Juggle 2" },
   { fire,                   "Fire" },
   { water,                  "Water" },
   { analogClock,            "Analog Clock" },
@@ -52,6 +56,7 @@ int brightness = 32;
 int patternCount = ARRAY_SIZE(patterns);
 int patternIndex = 0;
 String patternName = "Pride";
+String patternNames = "";
 int power = 1;
 int flipClock = 0;
 int timezone = -6;
@@ -162,12 +167,24 @@ void setup() {
 
     Particle.variable("power", power);
     Particle.variable("brightness", brightness);
-    Particle.variable("timezone", &timezone, INT);
-    Particle.variable("flipClock", &flipClock, INT);
+    Particle.variable("timezone", timezone);
+    Particle.variable("flipClock", flipClock);
     Particle.variable("patternCount", patternCount);
     Particle.variable("patternIndex", patternIndex);
     Particle.variable("patternName", patternName);
     Particle.variable("variable", variableValue);
+
+    patternNames = "[";
+    for(uint8_t i = 0; i < patternCount; i++)
+    {
+      patternNames.concat("\"");
+      patternNames.concat(patterns[i].name);
+      patternNames.concat("\"");
+      if(i < patternCount - 1)
+        patternNames.concat(",");
+    }
+    patternNames.concat("]");
+    Particle.variable("patternNames", patternNames);
 
     Time.zone(timezone);
 }
@@ -429,6 +446,56 @@ uint8_t juggle() {
   }
 
   return 8;
+}
+
+uint8_t juggle2() {
+  fadeToBlackBy( leds, NUM_LEDS, 20);
+  byte dothue = 0;
+
+  const uint8_t bpm = 20;
+  const uint8_t maxdotcount = 8;
+
+  static uint8_t dotcount = 1;
+  static uint8_t dotinc = 1;
+  static bool handled = false;
+
+  for( int i = 0; i < dotcount; i++)
+  {
+    uint8_t pos = beatsin8(bpm, 0, NUM_LEDS / 2, 0, i * (256 / maxdotcount));
+
+    if(i % 2 == 0)
+      pos = (NUM_LEDS - 1) - pos;
+
+    leds[pos] |= CHSV(dothue, 255, 255);
+
+    dothue += 256 / dotcount;
+  }
+
+  uint8_t newdotpos;
+
+  if(dotinc == 1)
+    newdotpos = beatsin8(bpm, 0, NUM_LEDS / 2, 0, dotcount * (256 / maxdotcount));
+  else if (dotinc == -1)
+    newdotpos = beatsin8(bpm, 0, NUM_LEDS / 2, 0, (dotcount - 1) * (256 / maxdotcount));
+
+  if((newdotpos == NUM_LEDS / 2 || newdotpos == (NUM_LEDS / 2) - 1))
+  {
+    if(!handled)
+    {
+      handled = true;
+
+      dotcount += dotinc;
+
+      if(dotcount == maxdotcount || dotcount == 1)
+        dotinc *= -1;
+    }
+  }
+  else
+  {
+    handled = false;
+  }
+
+  return 0;
 }
 
 uint8_t fire() {
