@@ -29,7 +29,8 @@ typedef PatternAndName PatternAndNameList[];
 
 // List of patterns to cycle through.  Each is defined as a separate function below.
 
-const PatternAndNameList patterns = {
+const PatternAndNameList patterns =
+{
   { pride,                  "Pride" },
   { colorWaves,             "Color Waves" },
   { rainbowTwinkles,        "Rainbow Twinkles" },
@@ -51,21 +52,18 @@ const PatternAndNameList patterns = {
   { showSolidColor,         "Solid Color" }
 };
 
+int patternCount = ARRAY_SIZE(patterns);
+
 // variables exposed via Particle cloud API (Spark Core is limited to 10)
 int brightness = 32;
-int patternCount = ARRAY_SIZE(patterns);
 int patternIndex = 0;
-String patternName = "Pride";
 String patternNames = "";
 int power = 1;
-int flipClock = 0;
-int timezone = -6;
-char variableValue[32] = "";
-
-// variables exposed via the variableValue variable, via Particle Cloud API
 int r = 0;
 int g = 0;
 int b = 255;
+int flipClock = 0;
+int timezone = -6;
 
 unsigned long lastTimeSync = millis();
 
@@ -78,7 +76,8 @@ CRGBPalette16 IceColors_p = CRGBPalette16(CRGB::Black, CRGB::Blue, CRGB::Aqua, C
 uint8_t paletteIndex = 0;
 
 // List of palettes to cycle through.
-CRGBPalette16 palettes[] = {
+CRGBPalette16 palettes[] =
+{
   RainbowColors_p,
   RainbowStripeColors_p,
   CloudColors_p,
@@ -99,7 +98,8 @@ CRGBPalette16 targetPalette = palettes[paletteIndex];
 // 20-120 is better for deployment
 #define SECONDS_PER_PALETTE 20
 
-void setup() {
+void setup()
+{
     FastLED.addLeds<APA102, A5, A3>(leds, NUM_LEDS);
     FastLED.setCorrection(TypicalLEDStrip);
     FastLED.setBrightness(brightness);
@@ -161,18 +161,16 @@ void setup() {
       flipClock = 1;
 
     Particle.function("patternIndex", setPatternIndex); // sets the current pattern index, changes to the pattern with the specified index
-    Particle.function("pNameCursor", movePatternNameCursor); // moves the pattern name cursor to the specified index, allows getting a list of pattern names
     Particle.function("variable", setVariable); // sets the value of a variable, args are name:value
-    Particle.function("varCursor", moveVariableCursor);
 
     Particle.variable("power", power);
     Particle.variable("brightness", brightness);
+    Particle.variable("patternIndex", patternIndex);
+    Particle.variable("r", r);
+    Particle.variable("g", g);
+    Particle.variable("b", b);
     Particle.variable("timezone", timezone);
     Particle.variable("flipClock", flipClock);
-    Particle.variable("patternCount", patternCount);
-    Particle.variable("patternIndex", patternIndex);
-    Particle.variable("patternName", patternName);
-    Particle.variable("variable", variableValue);
 
     patternNames = "[";
     for(uint8_t i = 0; i < patternCount; i++)
@@ -189,7 +187,8 @@ void setup() {
     Time.zone(timezone);
 }
 
-void loop() {
+void loop()
+{
   if (Particle.connected() && millis() - lastTimeSync > ONE_DAY_MILLIS) {
     // Request time synchronization from the Spark Cloud
     Particle.syncTime();
@@ -226,35 +225,8 @@ void loop() {
   };
 }
 
-uint8_t variableCursor = 0;
-
-int moveVariableCursor(String args)
+int setVariable(String args)
 {
-    if(args.startsWith("pwr")) {
-        itoa(power, variableValue, 10);
-        return power;
-    }
-    else if (args.startsWith("brt")) {
-        itoa(brightness, variableValue, 10);
-        return brightness;
-    }
-    else if (args.startsWith("r")) {
-        itoa(r, variableValue, 10);
-        return r;
-    }
-    else if (args.startsWith("g")) {
-        itoa(g, variableValue, 10);
-        return g;
-    }
-    else if (args.startsWith("b")) {
-        itoa(b, variableValue, 10);
-        return b;
-    }
-
-    return 0;
-}
-
-int setVariable(String args) {
     if(args.startsWith("pwr:")) {
         return setPower(args.substring(4));
     }
@@ -292,7 +264,8 @@ int setVariable(String args) {
     return -1;
 }
 
-int setPower(String args) {
+int setPower(String args)
+{
     power = args.toInt();
     if(power < 0)
         power = 0;
@@ -318,7 +291,8 @@ int setBrightness(String args)
     return brightness;
 }
 
-int setTimezone(String args) {
+int setTimezone(String args)
+{
     timezone = args.toInt();
     if(timezone < -12)
         power = -12;
@@ -372,19 +346,6 @@ int setPatternIndex(String args)
     return patternIndex;
 }
 
-int movePatternNameCursor(String args)
-{
-    int index = args.toInt();
-    if(index < 0)
-        index = 0;
-    else if (index >= patternCount)
-        index = patternCount - 1;
-
-    patternName = patterns[index].name;
-
-    return index;
-}
-
 uint8_t rainbow()
 {
   // FastLED's built-in rainbow generator
@@ -436,19 +397,44 @@ uint8_t bpm()
   return 8;
 }
 
-uint8_t juggle() {
-  // eight colored dots, weaving in and out of sync with each other
-  fadeToBlackBy( leds, NUM_LEDS, 20);
-  byte dothue = 0;
-  for( int i = 0; i < 8; i++) {
-    leds[beatsin16(i+7,0,NUM_LEDS - 1)] |= CHSV(dothue, 200, 255);
-    dothue += 32;
+uint8_t juggle()
+{
+  static uint8_t    numdots =   4; // Number of dots in use.
+  static uint8_t   faderate =   2; // How long should the trails be. Very low value = longer trails.
+  static uint8_t     hueinc =  255 / numdots - 1; // Incremental change in hue between each dot.
+  static uint8_t    thishue =   0; // Starting hue.
+  static uint8_t     curhue =   0; // The current hue
+  static uint8_t    thissat = 255; // Saturation of the colour.
+  static uint8_t thisbright = 255; // How bright should the LED/display be.
+  static uint8_t   basebeat =   5; // Higher = faster movement.
+
+  static uint8_t lastSecond =  99;  // Static variable, means it's only defined once. This is our 'debounce' variable.
+  uint8_t secondHand = (millis() / 1000) % 30; // IMPORTANT!!! Change '30' to a different value to change duration of the loop.
+
+  if (lastSecond != secondHand) { // Debounce to make sure we're not repeating an assignment.
+    lastSecond = secondHand;
+    switch(secondHand) {
+      case  0: numdots = 1; basebeat = 20; hueinc = 16; faderate = 2; thishue = 0; break; // You can change values here, one at a time , or altogether.
+      case 10: numdots = 4; basebeat = 10; hueinc = 16; faderate = 8; thishue = 128; break;
+      case 20: numdots = 8; basebeat =  3; hueinc =  0; faderate = 8; thishue=random8(); break; // Only gets called once, and not continuously for the next several seconds. Therefore, no rainbows.
+      case 30: break;
+    }
   }
 
-  return 8;
+  // Several colored dots, weaving in and out of sync with each other
+  curhue = thishue; // Reset the hue values.
+  fadeToBlackBy(leds, NUM_LEDS, faderate);
+  for( int i = 0; i < numdots; i++) {
+    //beat16 is a FastLED 3.1 function
+    leds[beatsin16(basebeat+i+numdots,0,NUM_LEDS)] += CHSV(gHue + curhue, thissat, thisbright);
+    curhue += hueinc;
+  }
+
+  return 0;
 }
 
-uint8_t juggle2() {
+uint8_t juggle2()
+{
   fadeToBlackBy( leds, NUM_LEDS, 20);
   byte dothue = 0;
 
@@ -486,7 +472,7 @@ uint8_t juggle2() {
 
       dotcount += dotinc;
 
-      if(dotcount == maxdotcount || dotcount == 1)
+      if(dotcount == maxdotcount - 1 || dotcount == 1)
         dotinc *= -1;
     }
   }
@@ -498,13 +484,15 @@ uint8_t juggle2() {
   return 0;
 }
 
-uint8_t fire() {
+uint8_t fire()
+{
     heatMap(HeatColors_p, true);
 
     return 30;
 }
 
-uint8_t water() {
+uint8_t water()
+{
     heatMap(IceColors_p, false);
 
     return 30;
@@ -579,7 +567,8 @@ uint8_t radialPaletteShift()
   return 8;
 }
 
-void heatMap(CRGBPalette16 palette, bool up) {
+void heatMap(CRGBPalette16 palette, bool up)
+{
     fill_solid(leds, NUM_LEDS, CRGB::Black);
 
     // Add entropy to random number generator; we use a lot of it.
@@ -642,7 +631,8 @@ void heatMap(CRGBPalette16 palette, bool up) {
 int oldSecTime = 0;
 int oldSec = 0;
 
-void drawAnalogClock(byte second, byte minute, byte hour, boolean drawMillis, boolean drawSecond) {
+void drawAnalogClock(byte second, byte minute, byte hour, boolean drawMillis, boolean drawSecond)
+{
     if(Time.second() != oldSec){
         oldSecTime = millis();
         oldSec = Time.second();
@@ -905,7 +895,8 @@ CRGB makeDarker( const CRGB& color, fract8 howMuchDarker)
 // cycles and about 100 bytes of flash program memory.
 uint8_t  directionFlags[ (NUM_LEDS+7) / 8];
 
-bool getPixelDirection( uint16_t i) {
+bool getPixelDirection( uint16_t i)
+{
   uint16_t index = i / 8;
   uint8_t  bitNum = i & 0x07;
 
@@ -913,7 +904,8 @@ bool getPixelDirection( uint16_t i) {
   return (directionFlags[index] & andMask) != 0;
 }
 
-void setPixelDirection( uint16_t i, bool dir) {
+void setPixelDirection( uint16_t i, bool dir)
+{
   uint16_t index = i / 8;
   uint8_t  bitNum = i & 0x07;
 

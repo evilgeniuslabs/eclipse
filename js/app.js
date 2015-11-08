@@ -19,7 +19,7 @@ app.controller('MainCtrl', function ($scope, $http, $timeout, variableService) {
   $scope.g = 0;
   $scope.b = 255;
   $scope.powerText = "On";
-  $scope.status = "Please enter your access token.";
+  $scope.status = "Please enter your access token:";
   $scope.disconnected = false;
   $scope.accessToken = "";
   $scope.isDeviceSelected = false;
@@ -95,7 +95,7 @@ app.controller('MainCtrl', function ($scope, $http, $timeout, variableService) {
 
   $scope.save = function () {
     localStorage["accessToken"] = $scope.accessToken;
-    $scope.status = "Saved access token.";
+    $scope.status = "Saved access token";
 
     $scope.getDevices();
   }
@@ -120,7 +120,7 @@ app.controller('MainCtrl', function ($scope, $http, $timeout, variableService) {
     })
 
     .then(function (data) {
-      return variableService.getExtendedVariableValue("r", $scope.device.id, $scope.accessToken);
+      return variableService.getVariableValue("r", $scope.device.id, $scope.accessToken);
     })
     .then(function (response) {
       $scope.r = response.data.return_value;
@@ -128,7 +128,7 @@ app.controller('MainCtrl', function ($scope, $http, $timeout, variableService) {
     })
 
     .then(function (data) {
-      return variableService.getExtendedVariableValue("g", $scope.device.id, $scope.accessToken);
+      return variableService.getVariableValue("g", $scope.device.id, $scope.accessToken);
     })
     .then(function (response) {
       $scope.g = response.data.return_value;
@@ -136,7 +136,7 @@ app.controller('MainCtrl', function ($scope, $http, $timeout, variableService) {
     })
 
     .then(function (data) {
-      return variableService.getExtendedVariableValue("b", $scope.device.id, $scope.accessToken);
+      return variableService.getVariableValue("b", $scope.device.id, $scope.accessToken);
     })
     .then(function (response) {
       $scope.b = response.data.return_value;
@@ -409,7 +409,7 @@ app.controller('MainCtrl', function ($scope, $http, $timeout, variableService) {
         }
 
         $scope.patternCount = patternNames.length;
-        $scope.status = 'Loaded patterns.';
+        $scope.status = 'Loaded patterns';
       },
       function (errorPayload) {
         $scope.busy = false;
