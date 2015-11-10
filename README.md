@@ -4,16 +4,15 @@
 
 [![Demo Videos](http://img.youtube.com/vi/dCE2dl4IW_E/0.jpg)](https://youtu.be/OM4Ad-Sr1Ro?list=PLUYGVM-2vDxLnqGd-mG_AMGEECwHlfd5e)
 
-Available from Evil Genius Labs: http://www.evilgeniuslabs.org
+Clock and art display built with 60 APA102 RGB LEDs, controlled with a [Particle Photon](https://store.particle.io/?product=particle-photon) using the [FastLED library](https://github.com/FastLED/FastLED).
 
-Clock and art display, built with 60 APA102 RGB LEDs, controlled with a Spark Core, using the FastLED library.
+Available in three standard sizes: large (13.5"), medium (10.5") or small (5.25").  Can be custom made to about any size.
 
-This is the large model and is about 13.5" across.
+Fully open-source, and programmable over Wi-Fi or micro USB cable.
 
-Controlled via an app or webpage over Wi-Fi, and/or a wireless infrared remote control.
+Build your own, or buy one (finished or kit) from [Evil Genius Labs](http://www.evilgeniuslabs.org): http://www.evilgeniuslabs.org
 
-Comes with over 20 patterns built-in.
-
-Programmable over Wi-Fi or micro USB cable.
+Controlled via a [web app](http://evilgeniuslabs.org/eclipse) over Wi-Fi, and/or a wireless infrared remote control.
 
 Wi-Fi Remote Control App: http://evilgeniuslabs.org/eclipse
+

@@ -110,7 +110,7 @@ void setup()
     pinMode(offlinePin, INPUT_PULLUP);
 
     if(digitalRead(offlinePin) == HIGH) {
-        Spark.connect();
+        Particle.connect();
     }
 
     // Serial.begin(9600);
@@ -498,7 +498,8 @@ uint8_t water()
     return 30;
 }
 
-uint8_t analogClock() {
+uint8_t analogClock()
+{
     dimAll(220);
 
     drawAnalogClock(Time.second(), Time.minute(), Time.hourFormat12(), true, true);
@@ -506,7 +507,8 @@ uint8_t analogClock() {
     return 8;
 }
 
-uint8_t showSolidColor() {
+uint8_t showSolidColor()
+{
     fill_solid(leds, NUM_LEDS, solidColor);
 
     return 30;
