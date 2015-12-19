@@ -272,6 +272,9 @@ int setVariable(String args)
         patternIndex = patternCount - 1;
         return b;
     }
+    else if (args.startsWith("c:")) { // c:255,255,255
+      return setColor(args.substring(2));
+    }
     else if (args.startsWith("tz:")) {
         return setTimezone(args.substring(3));
     }
@@ -307,6 +310,35 @@ int setBrightness(String args)
     EEPROM.write(0, brightness);
 
     return brightness;
+}
+
+int setColor(String args)
+{
+  char inputStr[12];
+  args.toCharArray(inputStr, 12);
+
+  char *p = strtok(inputStr, ",");
+  r = atoi(p);
+
+  p = strtok(NULL,",");
+  g = atoi(p);
+
+  p = strtok(NULL,",");
+  b = atoi(p);
+
+  p = strtok(NULL,",");
+
+  solidColor.r = r;
+  solidColor.g = g;
+  solidColor.b = b;
+
+  patternIndex = patternCount - 1;
+
+  EEPROM.write(2, r);
+  EEPROM.write(3, g);
+  EEPROM.write(4, b);
+
+  return 0;
 }
 
 int setTimezone(String args)
@@ -363,6 +395,8 @@ int setPatternIndex(String args)
 
     return patternIndex;
 }
+
+// Patterns from FastLED example DemoReel100: https://github.com/FastLED/FastLED/blob/master/examples/DemoReel100/DemoReel100.ino
 
 uint8_t rainbow()
 {
@@ -532,6 +566,7 @@ uint8_t showSolidColor()
     return 30;
 }
 
+// Pride2015 by Mark Kriegsman: https://gist.github.com/kriegsman/964de772d64c502760e5
 // This function draws rainbows with an ever-changing,
 // widely-varying set of parameters.
 uint8_t pride()
@@ -758,7 +793,7 @@ uint8_t colorWaves()
   return 20;
 }
 
-
+// ColorWavesWithPalettes by Mark Kriegsman: https://gist.github.com/kriegsman/8281905786e8b2632aeb
 // This function draws color waves with an ever-changing,
 // widely-varying set of parameters, using a color palette.
 void colorwaves( CRGB* ledarray, uint16_t numleds, CRGBPalette16& palette)
@@ -821,6 +856,8 @@ void palettetest( CRGB* ledarray, uint16_t numleds, const CRGBPalette16& gCurren
   fill_palette( ledarray, numleds, startindex, (256 / NUM_LEDS) + 1, gCurrentPalette, 255, LINEARBLEND);
 }
 
+// based on ColorTwinkles by Mark Kriegsman: https://gist.github.com/kriegsman/5408ecd397744ba0393e
+
 uint8_t cloudTwinkles()
 {
   gCurrentPalette = CloudColors_p; // Blues and whites!
@@ -830,7 +867,7 @@ uint8_t cloudTwinkles()
 
 uint8_t rainbowTwinkles()
 {
-  gCurrentPalette = RainbowColors_p; // Blues and whites!
+  gCurrentPalette = RainbowColors_p;
   colortwinkles();
   return 20;
 }

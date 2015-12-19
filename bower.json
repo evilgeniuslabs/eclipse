@@ -1,0 +1,22 @@
+{
+  "name": "eclipse",
+  "homepage": "https://github.com/evilgeniuslabs/eclipse",
+  "authors": [
+    "Jason Coon"
+  ],
+  "description": "",
+  "main": "",
+  "moduleType": [],
+  "license": "GPLv3",
+  "private": true,
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "angular-minicolors": "~0.0.7"
+  }
+}

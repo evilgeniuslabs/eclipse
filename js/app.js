@@ -1,4 +1,11 @@
-var app = angular.module('app', []);
+var app = angular.module('app', ['minicolors']);
+
+app.config(function (minicolorsProvider) {
+  angular.extend(minicolorsProvider.defaults, {
+    theme: 'bootstrap',
+    changeDelay: 200
+  })
+});
 
 app.config(function ($httpProvider) {
   $httpProvider.defaults.transformRequest = function (data) {
@@ -14,7 +21,7 @@ app.controller('MainCtrl', function ($scope, $http, $timeout, variableService) {
   $scope.brightness = "255";
   $scope.busy = false;
   $scope.power = 1;
-  $scope.color = "#0000ff"
+  $scope.color = "#0000ff";
   $scope.r = 0;
   $scope.g = 0;
   $scope.b = 255;
@@ -105,6 +112,7 @@ app.controller('MainCtrl', function ($scope, $http, $timeout, variableService) {
 
     localStorage["deviceId"] = $scope.device.id;
 
+    $scope.status = 'Loading power...';
     variableService.getVariableValue("power", $scope.device.id, $scope.accessToken)
     .then(function (response) {
       $scope.power = response.data.result;
@@ -112,6 +120,7 @@ app.controller('MainCtrl', function ($scope, $http, $timeout, variableService) {
     })
 
     .then(function (data) {
+      $scope.status = 'Loading brightness...';
       return variableService.getVariableValue("brightness", $scope.device.id, $scope.accessToken);
     })
     .then(function (response) {
@@ -120,26 +129,30 @@ app.controller('MainCtrl', function ($scope, $http, $timeout, variableService) {
     })
 
     .then(function (data) {
+      $scope.status = 'Loading red...';
       return variableService.getVariableValue("r", $scope.device.id, $scope.accessToken);
     })
     .then(function (response) {
-      $scope.r = response.data.return_value;
+      $scope.r = response.data.result;
       $scope.status = 'Loaded red';
     })
 
     .then(function (data) {
+      $scope.status = 'Loading green...';
       return variableService.getVariableValue("g", $scope.device.id, $scope.accessToken);
     })
     .then(function (response) {
-      $scope.g = response.data.return_value;
+      $scope.g = response.data.result;
       $scope.status = 'Loaded green';
     })
 
     .then(function (data) {
+      $scope.status = 'Loading blue...';
       return variableService.getVariableValue("b", $scope.device.id, $scope.accessToken);
     })
     .then(function (response) {
-      $scope.b = response.data.return_value;
+      $scope.b = response.data.result;
+      $scope.color = $scope.rgbToHex($scope.r, $scope.g, $scope.b);
       $scope.status = 'Loaded blue';
     })
 
@@ -252,76 +265,46 @@ app.controller('MainCtrl', function ($scope, $http, $timeout, variableService) {
   };
 
   $scope.setColor = function ($) {
-    var rgb = $scope.hexToRgb();
+    var color = $scope.hexToRgb($scope.color);
 
-    $scope.r = rgb.r;
-    $scope.g = rgb.g;
-    $scope.b = rgb.b;
+    $scope.r = color.r;
+    $scope.g = color.g;
+    $scope.b = color.b;
 
-    $scope.setR();
-    $scope.setG();
-    $scope.setB();
+    $scope.setRGB();
   };
 
-  $scope.hexToRgb = function ($) {
-    var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec($scope.color);
+  $scope.hexToRgb = function (color) {
+    var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(color);
     return result ? {
       r: parseInt(result[1], 16),
       g: parseInt(result[2], 16),
       b: parseInt(result[3], 16)
     } : null;
-  }
-
-  $scope.setR = function ($) {
-    // $scope.busy = true;
-    $http({
-      method: 'POST',
-      url: 'https://api.particle.io/v1/devices/' + $scope.device.id + '/variable',
-      data: { access_token: $scope.accessToken, args: "r:" + $scope.r },
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
-    }).
-    success(function (data, status, headers, config) {
-      $scope.busy = false;
-      $scope.r = data.return_value;
-      $scope.status = 'Red set';
-    }).
-    error(function (data, status, headers, config) {
-      $scope.busy = false;
-      $scope.status = data.error_description;
-    });
   };
 
-  $scope.setG = function ($) {
-    // $scope.busy = true;
-    $http({
-      method: 'POST',
-      url: 'https://api.particle.io/v1/devices/' + $scope.device.id + '/variable',
-      data: { access_token: $scope.accessToken, args: "g:" + $scope.g },
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
-    }).
-    success(function (data, status, headers, config) {
-      $scope.busy = false;
-      $scope.g = data.return_value;
-      $scope.status = 'Green set';
-    }).
-    error(function (data, status, headers, config) {
-      $scope.busy = false;
-      $scope.status = data.error_description;
-    });
+  $scope.componentToHex = function(c) {
+    var hex = c.toString(16);
+    return hex.length == 1 ? "0" + hex : hex;
   };
 
-  $scope.setB = function ($) {
+  $scope.rgbToHex = function(r, g, b) {
+    return "#" + $scope.componentToHex(r) + $scope.componentToHex(g) + $scope.componentToHex(b);
+  };
+
+  $scope.setRGB = function ($) {
     // $scope.busy = true;
+    $scope.status = 'Setting color...';
     $http({
       method: 'POST',
       url: 'https://api.particle.io/v1/devices/' + $scope.device.id + '/variable',
-      data: { access_token: $scope.accessToken, args: "b:" + $scope.b },
+      data: { access_token: $scope.accessToken, args: "c:" + $scope.r + "," + $scope.g + "," + $scope.b },
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
     }).
     success(function (data, status, headers, config) {
       $scope.busy = false;
-      $scope.b = data.return_value;
-      $scope.status = 'Blue set';
+      // $scope.r = data.return_value;
+      $scope.status = 'Color set';
     }).
     error(function (data, status, headers, config) {
       $scope.busy = false;
@@ -396,6 +379,8 @@ app.controller('MainCtrl', function ($scope, $http, $timeout, variableService) {
 
   $scope.getPatterns = function () {
     // $scope.busy = true;
+
+    $scope.patterns = [];
 
     // get the pattern name list
     var promise = $http.get('https://api.particle.io/v1/devices/' + $scope.device.id + '/patternNames?access_token=' + $scope.accessToken);
