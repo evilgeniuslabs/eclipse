@@ -173,11 +173,11 @@ app.controller('MainCtrl', function ($scope, $http, $timeout, variableService) {
     })
 
     .then(function () {
-      $scope.getPatterns();
+      return $scope.getPatterns();
     })
 
     .then(function () {
-      $scope.getPatternIndex();
+      return $scope.getPatternIndex();
     })
   }
 
