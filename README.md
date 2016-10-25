@@ -12,7 +12,7 @@ Fully open-source, and programmable over Wi-Fi or micro USB cable.
 
 Build your own, or buy one (finished or kit) from [Evil Genius Labs](http://www.evilgeniuslabs.org): http://www.evilgeniuslabs.org
 
-Controlled via a [web app](http://evilgeniuslabs.org/eclipse) over Wi-Fi, and/or a wireless infrared remote control.
+Controlled via a [web app](http://evilgeniuslabs.github.io/eclipse) over Wi-Fi, and/or a wireless infrared remote control.
 
-Wi-Fi Remote Control App: https://evilgeniuslabs.github.io/eclipse
+Wi-Fi Remote Control App: http://evilgeniuslabs.github.io/eclipse
 
